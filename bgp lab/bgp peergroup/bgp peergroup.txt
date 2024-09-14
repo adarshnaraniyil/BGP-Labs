@@ -1,0 +1,169 @@
+CONFIGURATION IP INTERFACE 
+
+R1
+
+conf t
+int f0/0
+ip add 200.200.110.1 255.255.255.0
+no shut
+ex
+int lo 0
+ip add 1.1.1.1 255.255.255.0
+no shut 
+ex
+int f0/1
+ip add 200.200.10.1 255.255.255.0 
+no shut 
+ex
+int f0/1
+ip add 200.200.120.1 255.255.255.0
+no shut 
+ex
+int f1/0
+ip add 200.200.130.1 255.255.255.0
+no shut 
+ex
+end 
+
+R2
+
+conf t
+int f0/0
+ip add 200.200.110.2 255.255.255.0
+no shut
+ex
+int lo 0
+ip add 2.2.2.2 255.255.255.0
+no shut 
+ex
+int f0/1
+ip add 200.200.20.1 255.255.255.0 
+no shut 
+end 
+
+R3
+
+conf t
+int f0/0
+ip add 200.200.120.2 255.255.255.0
+no shut
+ex
+int lo 0
+ip add 3.3.3.3 255.255.255.0
+no shut 
+ex
+int f0/1
+ip add 200.200.30.1 255.255.255.0 
+no shut 
+end 
+
+R4
+
+conf t
+int f0/0
+ip add 200.200.130.2 255.255.255.0
+no shut
+ex
+int lo 0
+ip add 4.4.4.4 255.255.255.0
+no shut 
+ex
+int f0/1
+ip add 200.200.40.1 255.255.255.0 
+no shut 
+end 
+
+
+
+
+
+CONFIGURATION IP EIGRP
+
+R1
+
+conf t
+router eigrp 100
+no auto-summary 
+net 1.0.0.0 
+net 200.200.110.0
+net 200.200.120.0
+net 200.200.130.0
+end
+
+R2
+
+conf t
+router eigrp 100
+no auto-summary 
+net 2.0.0.0 
+net 200.200.110.0
+end
+
+R3
+
+conf t
+router eigrp 100
+no auto-summary 
+net 3.0.0.0 
+net 200.200.120.0
+end
+
+R4
+
+conf t
+router eigrp 100
+no auto-summary 
+net 4.0.0.0 
+net 200.200.130.0
+end
+
+
+CONFIGURATION IP BGP 
+
+R1
+
+conf t
+router bgp 100
+bgp router-id 1.1.1.1
+neighbor pg1 peer-group 
+neighbor pg1 remote-as 100
+neighbor pg1 next-hop-self
+neighbor pg1 update-source loopback 0
+neighbor pg1 route-reflector-client
+neighbor 2.2.2.2 peer-group pg1
+neighbor 3.3.3.3 peer-group pg1
+neighbor 4.4.4.4 peer-group pg1
+net 200.200.10.0
+end
+
+R2
+
+conf t
+router bgp 100
+bgp router-id 2.2.2.2
+neighbor 1.1.1.1 remote-as 100
+neighbor 1.1.1.1 update-source loopback 0
+neighbor 1.1.1.1 next-hop-self
+net 200.200.20.0
+end
+
+R3
+
+conf t
+router bgp 100
+bgp router-id 3.3.3.3
+neighbor 1.1.1.1 remote-as 100
+neighbor 1.1.1.1 update-source loopback 0
+neighbor 1.1.1.1 next-hop-self
+net 200.200.30.0
+end
+
+R4
+
+conf t
+router bgp 100
+bgp router-id 4.4.4.4
+neighbor 1.1.1.1 remote-as 100
+neighbor 1.1.1.1 update-source loopback 0
+neighbor 1.1.1.1 next-hop-self
+net 200.200.40.0

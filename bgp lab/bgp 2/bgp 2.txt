@@ -1,0 +1,186 @@
+CONFIGURATION IP INTERFACE
+
+R1
+
+conf t
+int f0/0
+ip add 200.200.20.1  255.255.255.0
+no sh 
+ex
+int f0/1
+ip add 200.200.10.1   255.255.255.0
+no sh
+ex
+int lo 0 
+ip add 200.200.11.1 255.255.255.0
+no sh 
+end
+
+
+R2
+
+conf t
+int f0/0
+ip add 200.200.40.1  255.255.255.0
+no sh 
+ex
+int f0/1
+ip add 200.200.20.2   255.255.255.0 
+no sh 
+ex
+int f1/0
+ip add 200.200.100.1 255.255.255.0
+no sh
+ex
+int lo 0
+ip add 200.200.12.2   255.255.255.0
+no sh
+ex
+int f0/1
+ip add 200.200.40.1  255.255.255.0
+no sh 
+end
+
+R3
+ 
+conf t
+int f0/0
+ip add 200.200.40.2  255.255.255.0
+no sh 
+ex
+int f0/1
+ip add 200.200.80.1   255.255.255.0
+no sh 
+ex
+int f1/0
+ip add 200.200.60.1  255.255.255.0
+no sh 
+ex
+int f1/1
+ip add 200.200.50.1 255.255.255.0
+no sh 
+ex
+int lo 0
+ip add 200.200.13.3     255.255.255.0
+no sh
+ex
+end
+
+R4
+
+conf t
+int f0/0
+ip add 200.200.60.2  255.255.255.0
+no sh 
+ex
+int f0/1
+ip add 200.200.70.1   255.255.255.0
+no sh
+ex
+int lo 0 
+ip add 200.200.14.4 255.255.255.0
+no sh 
+end
+
+R5
+
+conf t
+int f0/0
+ip add 200.200.80.2  255.255.255.0
+no sh 
+ex
+int f0/1
+ip add 200.200.90.1   255.255.255.0
+no sh
+ex
+int lo 0 
+ip add 200.200.15.5 255.255.255.0
+no sh
+end
+
+CONFIGUARATIO IP BGP
+
+R1
+
+conf t
+router bgp 100
+bgp router-id 1.1.1.1
+neighbor 200.200.12.2 ebgp-multihop
+neighbor 200.200.12.2 update-source loopback 0
+net 200.200.10.0 mask 255.255.255.0
+
+R2
+
+conf t
+router bgp 200
+bgp router-id 2.2.2.2
+neighbor 200.200.13.3 update-source loopback 0
+neighbor 200.200.11.1 ebgp-mutihop
+net 200.200.100.0 mask 255.255.255.0
+
+R3
+
+conf t
+router bgp 200
+bgp router-id 3.3.3.3
+neighbor 200.200.15.5 update-source loopback 0
+neighbor 200.200.14.4 update-source loopback 0
+neighbor 200.200.12.2 update-source loopback 0
+neighbor 200.200.40.1 route-reflector-client
+neighbor 200.200.80.2 route-reflector-client
+neighbor 200.200.60.2 route-reflector-client
+net 200.200.50.0 mask 255.255.255.0
+
+
+R4
+
+conf t
+router bgp 200
+bgp router-id 4.4.4.4
+neighbor 200.200.13.3 update-source loopback 0
+neighbor 200.200.15.5 update-source loopback 0
+neighbor 200.200.12.2 update-source loopback 0
+net 200.200.70.0 mask 255.255.255.0
+
+R5
+
+conf t
+router bgp 200
+bgp router-id 5.5.5.5
+neighbor 200.200.13.3 update-source loopback 0
+neighbor 200.200.14.4 update-source loopback 0
+net 200.200.90.0 mask 255.255.255.0
+
+
+STATIC
+
+R1
+
+ip route 200.200.12.0 255.255.255.0 200.200.20.2
+
+R2
+
+ip route 200.200.11.0 255.255.255.0 200.200.20.1
+
+EIGRP
+
+R2
+
+router eigrp 100
+net 200.200.40.0 
+ 
+
+R3
+
+router eigrp 100
+net 200.200.80.0 
+net 200.200.40.0 
+
+R4
+
+router eigrp 100
+net 200.200.60.0 
+net 200.200.70.0 
+
+
+

@@ -1,0 +1,190 @@
+CONFIGURATION IP INTERFACE
+
+R1
+
+conf t
+int f0/0
+ip add 200.200.20.1 255.255.255.0
+no sh 
+ex
+int f0/1
+ip add 200.200.30.1 255.255.255.0
+no sh 
+ex
+int loo 0
+ip add 200.200.10.1 255.255.255.0
+no sh 
+end
+
+
+R2
+
+conf t
+int f0/0
+ip add 200.200.20.2 255.255.255.0
+no sh 
+ex
+int f0/1
+ip add 200.200.40.1 255.255.255.0
+no sh 
+end
+
+R3
+
+conf t
+int f0/0
+ip add 200.200.30.2 255.255.255.0
+no sh 
+ex
+int f0/1
+ip add 200.200.50.1 255.255.255.0
+no sh 
+end
+
+R4
+
+conf t
+int f0/0
+ip add 200.200.40.2 255.255.255.0
+no sh 
+ex
+int f0/1
+ip add 200.200.70.1 255.255.255.0
+no sh 
+end
+
+R5
+ 
+conf t
+int f0/0
+ip add 200.200.50.2 255.255.255.0
+no sh 
+ex
+int f0/1
+ip add 200.200.60.1 255.255.255.0
+no sh 
+end
+
+R6
+
+conf t
+int f0/0
+ip add 200.200.60.2 255.255.255.0
+no sh 
+ex
+int f0/1
+ip add 200.200.80.1 255.255.255.0
+no sh 
+end
+
+R7 
+
+conf t
+int f0/0
+ip add 200.200.70.2 255.255.255.0
+no sh 
+ex
+int f0/1
+ip add 200.200.80.2 255.255.255.0
+no sh 
+ex
+int loo 0
+ip add 200.200.90.1 255.255.255.0
+ex
+int loo 1
+ip add 200.200.100.1 255.255.255.0
+end
+
+CONFIGURATION IP BGP
+
+R1
+
+conf t
+router bgp 100
+bgp router-id 1.1.1.1
+neighbor 200.200.20.2 remote-as 100
+neighbor 200.200.30.2 remote-as 100
+net 200.200.10.0
+net 200.200.20.0
+net 200.200.30.0
+end
+
+R2
+
+conf t
+router bgp 100
+bgp router-id 2.2.2.2
+neighbor 200.200.20.1 remote-as 100
+neighbor 200.200.20.1 next-hop-self
+neighbor 200.200.40.2 remote-as 400
+net 200.200.40.0
+net 200.200.20.0
+end
+
+R3
+
+conf t
+router bgp 100
+bgp router-id 3.3.3.3
+neighbor 200.200.30.1 remote-as 100
+neighbor 200.200.30.1 next-hop-self
+neighbor 200.200.50.2 remote-as 500
+net 200.200.30.0
+net 200.200.50.0
+end
+
+R4
+
+conf t
+router bgp 400
+bgp router-id 4.4.4.4
+neighbor 200.200.40.1 remote-as 100
+neighbor 200.200.70.2 remote-as 700
+net 200.200.40.0
+net 200.200.70.0
+end
+
+R5
+
+conf t
+router bgp 500
+bgp router-id 5.5.5.5
+neighbor 200.200.50.1 remote-as 100
+neighbor 200.200.60.2 remote-as 600
+net 200.200.50.0
+net 200.200.60.0
+end
+
+
+R6
+
+conf t
+router bgp 600
+bgp router-id 6.6.6.6
+neighbor 200.200.60.1 remote-as 500
+neighbor 200.200.80.2 remote-as 700
+net 200.200.60.0
+net 200.200.80.0
+end
+
+R7
+
+conf t
+router bgp 700
+bgp router-id 7.7.7.7
+neighbor 200.200.70.1 remote-as 400
+neighbor 200.200.80.1 remote-as 600
+net 200.200.70.0
+net 200.200.80.0
+net 200.200.90.0 
+net 200.200.100.0
+end
+
+WEIGHT ATTRIBUTE 
+
+R1
+
+conf t
+router bgp 100
+neighbor 200.200.30.2 weight 300
+end

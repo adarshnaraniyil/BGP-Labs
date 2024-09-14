@@ -1,0 +1,326 @@
+CONFIGURATION IP INTERFACE
+
+R1
+
+conf t
+int f0/0
+ip add 200.200.20.1 255.255.255.0
+no sh 
+ex
+int f0/1
+ip add 200.200.30.1 255.255.255.0
+no sh 
+ex
+int loo 0
+ip add 200.200.10.1 255.255.255.0
+no sh 
+end
+
+
+R2
+
+conf t
+int f0/0
+ip add 200.200.20.2 255.255.255.0
+no sh 
+ex
+int f0/1
+ip add 200.200.40.1 255.255.255.0
+no sh 
+end
+
+R3
+
+conf t
+int f0/0
+ip add 200.200.30.2 255.255.255.0
+no sh 
+ex
+int f0/1
+ip add 200.200.50.1 255.255.255.0
+no sh 
+end
+
+R4
+
+conf t
+int f0/0
+ip add 200.200.40.2 255.255.255.0
+no sh 
+ex
+int f0/1
+ip add 200.200.70.1 255.255.255.0
+no sh 
+end
+
+R5
+ 
+conf t
+int f0/0
+ip add 200.200.50.2 255.255.255.0
+no sh 
+ex
+int f0/1
+ip add 200.200.60.1 255.255.255.0
+no sh 
+end
+
+R6
+
+conf t
+int f0/0
+ip add 200.200.60.2 255.255.255.0
+no sh 
+ex
+int f0/1
+ip add 200.200.80.1 255.255.255.0
+no sh 
+end
+
+R7 
+
+conf t
+int f0/0
+ip add 200.200.70.2 255.255.255.0
+no sh 
+ex
+int f0/1
+ip add 200.200.80.2 255.255.255.0
+no sh 
+ex
+int loo 0
+ip add 200.200.90.1 255.255.255.0
+ex
+int loo 1
+ip add 200.200.100.1 255.255.255.0
+end
+
+CONFIGURATION IP BGP
+
+R1
+
+conf t
+router bgp 100
+bgp router-id 1.1.1.1
+neighbor 200.200.20.2 remote-as 100
+neighbor 200.200.30.2 remote-as 100
+net 200.200.10.0
+net 200.200.20.0
+net 200.200.30.0
+end
+
+R2
+
+conf t
+router bgp 100
+bgp router-id 2.2.2.2
+neighbor 200.200.20.1 remote-as 100
+neighbor 200.200.20.1 next-hop-self
+neighbor 200.200.40.2 remote-as 400
+net 200.200.40.0
+net 200.200.20.0
+end
+
+R3
+
+conf t
+router bgp 100
+bgp router-id 3.3.3.3
+neighbor 200.200.30.1 remote-as 100
+neighbor 200.200.30.1 next-hop-self
+neighbor 200.200.50.2 remote-as 500
+net 200.200.30.0
+net 200.200.50.0
+end
+
+R4
+
+conf t
+router bgp 400
+bgp router-id 4.4.4.4
+neighbor 200.200.40.1 remote-as 100
+neighbor 200.200.70.2 remote-as 700
+net 200.200.40.0
+net 200.200.70.0
+end
+
+R5
+
+conf t
+router bgp 500
+bgp router-id 5.5.5.5
+neighbor 200.200.50.1 remote-as 100
+neighbor 200.200.60.2 remote-as 600
+net 200.200.50.0
+net 200.200.60.0
+end
+
+
+R6
+
+conf t
+router bgp 600
+bgp router-id 6.6.6.6
+neighbor 200.200.60.1 remote-as 500
+neighbor 200.200.80.2 remote-as 700
+net 200.200.60.0
+net 200.200.80.0
+end
+
+R7
+
+conf t
+router bgp 700
+bgp router-id 7.7.7.7
+neighbor 200.200.70.1 remote-as 400
+neighbor 200.200.80.1 remote-as 600
+net 200.200.70.0
+net 200.200.80.0
+net 200.200.90.0 
+net 200.200.100.0
+end
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+WEIGHT ATTRIBUTE 
+
+
+R1 must choose R3 as the best path to reach 90.1 & 100.1 network 
+increase weight attribute on R1
+
+
+R1
+
+conf t
+router bgp 100
+neighbor 200.200.30.2 weight 300
+end
+
+
+
+RESTART BGP TABLE 
+
+clear ip bgp 200.200.30.2
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+LOCAL PREFERENCE ATTRIBUTE 
+
+
+R1 must choose R3 as the best path to reach 90.1 & 100.1 network 
+increase weight attribute on R3
+
+
+R3
+
+conf t
+router bgp 100
+bgp default local-preference 200
+end
+
+
+RESTART BGP TABLE 
+
+clear ip bgp 200.200.30.2
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+WEIGHT ATTRIBUTE USING ROUTE MAP
+
+
+R1 should choose R2 as the best path to reach 90.1 network 
+R1 should choose R3 as the best path to reach 100.1 network 
+Use routemap to make changes in weight attribute on R1 
+
+
+R1
+
+conf t
+access-list 5 permit 200.200.90.0 0.0.0.255
+access-list 7 permit 200.200.100.0 0.0.0.255
+
+route-map map1 permit 10
+match ip add 5
+set weight 500
+ex 
+
+route-map map2 permit 20
+match ip add 7
+set weight 500
+ex 
+
+router bgp 100
+neighbor 200.200.20.2 route-map map1 in
+neighbor 200.200.30.2 route-map map2 in
+end
+
+
+RESTART BGP TABLE 
+
+clear ip bgp 200.200.30.2
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+LOCAL PREFERENCE ATTRIBUTE USING ROUTE MAP
+
+
+R1 should choose R2 as the best path to reach 90.1 network 
+R1 should choose R3 as the best path to reach 100.1 network 
+Use routemap to make changes in local preference value on R2
+
+
+
+R2
+
+conf t
+access-list 1 permit 200.200.90.0 0.0.0.255
+access-list 2 permit 200.200.100.0 0.0.0.255
+
+route-map map1 permit 10
+match ip add 1
+set local-preference 200
+ex 
+
+route-map map1 permit 20
+match ip add 2
+set local-preference  50
+ex 
+
+route-map map1 permit 30
+
+router bgp 100
+neighbor 200.200.20.1 route-map map1 out
+
+
+
+RESTART BGP TABLE 
+
+clear ip bgp 200.200.30.2
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+AS PATH ATTRIBUTE USING ROUTE MAP
+
+
+R1 should choose R3 R5 R6 R7 path to reach 100.1 network
+Use routemap to make changes in AS path on R7
+
+R7
+
+access-list 2 permit 200.200.100.0 0.0.0.255
+
+route-map map1 permit 10
+match ip add 2
+set as-path prepend 700 700 700
+ex 
+
+route-map map1 permit 20
+
+router bgp 700
+neighbor 200.200.70.1 route-map map1 out
+
+
+
+RESTART BGP TABLE 
+
+clear ip bgp 200.200.20.2

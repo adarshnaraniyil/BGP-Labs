@@ -1,0 +1,183 @@
+CONFIGURATION IP INTERFACE
+
+R1
+
+conf t
+int f0/0
+ip add 200.200.20.1 255.255.255.0
+no shut
+ex
+int f0/1
+ip add 200.200.30.1 255.255.255.0
+no shut 
+ex
+int lo 0
+ip add 200.200.10.1 255.255.255.0
+no sh 
+end 
+
+R2
+
+conf t
+int f0/0
+ip add 200.200.20.2 255.255.255.0
+no shut
+ex
+int f0/1
+ip add 200.200.50.1 255.255.255.0
+no shut
+ex
+int f1/0
+ip add 200.200.40.1 255.255.255.0
+no shut 
+end 
+
+R3
+
+conf t
+int f0/0
+ip add 200.200.30.2 255.255.255.0
+no shut
+ex
+int f0/1
+ip add 200.200.60.1 255.255.255.0
+no shut
+ex
+int f1/0
+ip add 200.200.40.2 255.255.255.0
+no shut
+end 
+
+R4
+
+conf t
+int f0/0
+ip add 200.200.50.2 255.255.255.0
+no shut
+ex
+int f0/1
+ip add 200.200.60.2 255.255.255.0
+no shut 
+ex
+int lo 0
+ip add 200.200.70.1 255.255.255.0
+no shut
+end 
+
+CONFIGURATION IP BGP  
+
+R1
+
+conf t
+router bgp 100
+bgp router-id 1.1.1.1
+neighbor 200.200.20.2 remote-as 200
+neighbor 200.200.30.2 remote-as 200
+net 200.200.10.0 
+net 200.200.20.0 
+net 200.200.30.0 
+end
+
+R2
+
+
+conf t
+router bgp 200
+bgp router-id 2.2.2.2
+neighbor 200.200.20.1 remote-as 100
+neighbor 200.200.40.2 remote-as 200
+neighbor 200.200.40.2 next-hop-self
+neighbor 200.200.50.2 remote-as 400
+net 200.200.20.0 
+net 200.200.40.0
+net 200.200.50.0 
+end
+
+R3
+
+
+conf t
+router bgp 200
+bgp router-id 3.3.3.3
+neighbor 200.200.30.1 remote-as 100
+neighbor 200.200.40.1 remote-as 200
+neighbor 200.200.40.1 next-hop-self
+neighbor 200.200.60.2 remote-as 400
+net 200.200.30.0 
+net 200.200.40.0 
+net 200.200.60.0 
+end
+
+R4
+
+
+conf t
+router bgp 400
+bgp router-id 4.4.4.4
+neighbor 200.200.50.1 remote-as 200
+neighbor 200.200.60.1 remote-as 200
+net 200.200.50.0 
+net 200.200.60.0
+net 200.200.70.0 
+end
+
+
+MED CONFIGURATION
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+SELECT R2 AS THE UPLOADING PATH TO REMOTE SITE 
+200.200.70.0 , USE WEIGHT ATTRIBUTE CONFIG IT ON R1
+
+R1
+
+
+conf t
+access-list 1 permit 200.200.70.0 0.0.0.255
+
+route-map map1 permit 10
+match ip add 1
+set weight 80
+ex
+
+route-map map1 permit 20
+ex
+
+router bgp 100
+neighbor 200.200.30.2 route-map map1 in 
+end
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+SELECT R3 AS THE DOWNLOADING PATH TO REMOTE SITE 
+200.200.10.0 ,USE WEIGHT ATTRIBUTE CONFIG IT ON  R4
+
+
+R4
+
+
+conf t
+access-list 2 permit 200.200.10.0 0.0.0.255
+
+route-map map2 permit 10
+match ip add 2
+set weight 80
+ex
+
+route-map map2 permit 20
+ex
+
+router bgp 400
+neighbor 200.200.50.1 route-map map2 in  
+ex
+
+
+RESTARTING BGP TABLE 
+
+
+clear ip bgp *
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------

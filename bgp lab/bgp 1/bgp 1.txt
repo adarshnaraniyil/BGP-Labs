@@ -1,0 +1,52 @@
+CONFIGURATION IP INTERFACE
+
+R1
+
+conf t
+int f0/0
+ip add 200.200.20.1 255.255.255.0
+no sh
+ex
+int lo 0
+ip add 200.200.10.1 255.255.255.0
+no sh 
+end
+
+
+R2
+
+conf t
+int f0/0
+ip add 200.200.20.2 255.255.255.0
+no sh
+ex
+int lo 0
+ip add 200.200.30.1 255.255.255.0
+no sh 
+end
+
+
+CONFIGUARATION IP BGP
+
+R1
+
+conf t
+router bgp 100
+bgp router-id 1.1.1.1
+neighbor 200.200.20.2 remote-as 200
+net 200.200.20.0 mask 255.255.255.0
+net 200.200.10.0 mask 255.255.255.0
+ex
+
+
+R2
+
+conf t
+router bgp 200
+bgp router-id 2.2.2.2
+neighbor 200.200.20.1 remote-as 100
+net 200.200.20.0 mask 255.255.255.0
+net 200.200.30.0 mask 255.255.255.0
+ex
+
+
