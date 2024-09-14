@@ -2,4 +2,4 @@
 
 BGP Labs in CCNP using GNS3
 
-Click link
+Click to download GNS3 https://rb.gy/bevet9
